@@ -27,33 +27,19 @@ headers ={
         'Accept': 'application/json',
         'X-API-Key': SETLIST_API_KEY
 }
-maxPageNum = 2
 
 colnames = ['eventDate','url','venueName','cityName','CountryName']
 target_props = ['eventDate', 'url']
 target_list = []
 
 def main():
-    # fetch_first_page_setlist()
     fetch_all_setlist()
 
     last_row =len(target_list)
     ss.update('A1:B{}'.format(last_row), target_list)
 
-def calcu_max_page_num(total:int, itemPerPage:int) -> int:
-    return math.ceil(total / itemPerPage)
-
-def fetch_first_page_setlist():
-    req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req) as res:
-        body = res.read()
-        dict_str = body.decode("UTF-8")
-        dict_body = ast.literal_eval(dict_str)
-        dict_setlists = dict_body["setlist"]
-        for setlist in dict_setlists:
-            object_to_flat_array(setlist)
-
-def fetch_all_setlist():
+def fetch_all_setlist() -> None:
+    max_page_num =15
     for page_num in range(1, max_page_num):
         url_with_params = f'https://api.setlist.fm/rest/1.0/artist/e6e879c0-3d56-4f12-b3c5-3ce459661a8e/setlists?p={page_num}'
         req = urllib.request.Request(url_with_params, headers=headers)
@@ -79,4 +65,11 @@ def object_to_flat_array(target:dict) -> None:
         elif isinstance(target, dict):
             object_to_flat_array(target)
         else:
+            print(value)
     target_list.append(item_array)
+
+def calcu_max_page_num(total:int, itemPerPage:int) -> int:
+    return math.ceil(total / itemPerPage)
+
+
+main()

@@ -40,7 +40,7 @@ def main():
 
 def fetch_all_setlist() -> None:
     max_page_num =15
-    for page_num in range(1, max_page_num):
+    for page_num in range(1, 15):
         url_with_params = f'https://api.setlist.fm/rest/1.0/artist/e6e879c0-3d56-4f12-b3c5-3ce459661a8e/setlists?p={page_num}'
         req = urllib.request.Request(url_with_params, headers=headers)
 

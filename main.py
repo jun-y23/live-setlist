@@ -6,6 +6,8 @@ import os
 import json
 import math
 import ast
+import sys
+sys.setrecursionlimit(10000)
 
 SETLIST_API_KEY = settings.SETLIST_API_KEY
 api_scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -45,31 +47,32 @@ def fetch_all_setlist() -> None:
         req = urllib.request.Request(url_with_params, headers=headers)
 
         with urllib.request.urlopen(req) as res:
-            body = res.read()
-            dict_str = body.decode("UTF-8")
-            dict_body = ast.literal_eval(dict_str)
+            body = json.loads(res.read().decode('utf8'))
+            print(page_num)
             if page_num == 1:
-                itemsPerPage = dict_body["itemsPerPage"]
-                total = dict_body["total"]
+                itemsPerPage = body['itemsPerPage']
+                total = body['total']
                 max_page_num = calcu_max_page_num(total, itemsPerPage)
-            dict_setlists = dict_body["setlist"]
+            dict_setlists = body['setlist']
             for setlist in dict_setlists:
                 object_to_flat_array(setlist)
 
 def object_to_flat_array(target:dict) -> None:
     item_array = []
     for key, value in target.items():
-        if isinstance(key, str):
-            if key == "eventDate" or key == "url":
+        if isinstance(value, str):
+            if key in target_props:
                 item_array.append(value)
-        elif isinstance(target, dict):
-            object_to_flat_array(target)
+        elif isinstance(value, dict):
+            if key == 'venue':
+                item_array.append(value['name'])
+                item_array.append(value['city']['name'])
+                item_array.append(value['city']['country']['name'])
         else:
             print(value)
     target_list.append(item_array)
 
 def calcu_max_page_num(total:int, itemPerPage:int) -> int:
     return math.ceil(total / itemPerPage)
-
 
 main()
